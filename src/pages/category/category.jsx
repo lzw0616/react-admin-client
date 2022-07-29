@@ -90,6 +90,7 @@ export default class Category extends Component {
   }
   //响应点击取消，隐藏确定框
   handleCancel = () => {
+    this.form.current.resetFields();
     this.setState({
       showStatus: 0,
     });
@@ -100,25 +101,50 @@ export default class Category extends Component {
       showStatus: 1,
     });
   };
+  addCategory = () => {
+    this.form.current.validateFields().then(async values => {
+      this.setState({
+        showStatus: 0
+      })
+      const { parentId, categoryName } = this.form.current.getFieldsValue();
+      const result = await reqAddCategory(categoryName, parentId)
+      this.form.current.resetFields();
+      if (result.status === 0) {
+
+        // 添加的分类就是当前分类列表下的分类
+        if (parentId === this.state.parentId) {
+          // 重新获取当前分类列表显示
+          this.getCategorys()
+        } else if (parentId === '0') { // 在二级分类列表下添加一级分类, 重新获取一级分类列表, 但不需要显示一级列表
+          this.getCategorys('0')
+        }
+      }
+    })
+
+  }
+
   //   显示更新的确认框
   showUpdate = (category) => {
+
     // 保存分类对象
     this.category = category;
     this.setState({
       showStatus: 2,
     });
   };
-  updateCategory= async ()=>{
-    this.setState({
-      showStatus:0
+  updateCategory = async () => {
+    this.form.current.validateFields().then(async values => {
+      this.setState({
+        showStatus: 0
+      })
+      const categoryId = this.category._id;
+      const categoryName = this.form.current.getFieldsValue().categoryName;
+      const result = await reqUpdateCategory({ categoryId, categoryName })
+      if (result.status === 0) {
+        this.getCategorys()
+      }
     })
-    const categoryId=this.category._id;
-    const categoryName=this.form.current.getFieldsValue().categoryName;
-    console.log(this.form)
-    const result=await reqUpdateCategory({categoryId,categoryName})
-    if(result.status===0){
-      this.getCategorys()
-    }
+
   }
   render() {
     const {
@@ -130,7 +156,7 @@ export default class Category extends Component {
       showStatus,
     } = this.state;
     const category = this.category || {};
-    
+
     const title =
       parentId === "0" ? (
         "一级分类列表"
@@ -163,7 +189,9 @@ export default class Category extends Component {
           onOk={this.addCategory}
           onCancel={this.handleCancel}
         >
-          <AddForm categorys={categorys} parentId={parentId} />
+          <AddForm categorys={categorys} parentId={parentId}
+            setForm={(form) => { this.form = form }}
+          />
         </Modal>
         <Modal
           title="更新分类"
@@ -171,9 +199,9 @@ export default class Category extends Component {
           onOk={this.updateCategory}
           onCancel={this.handleCancel}
         >
-          <UpdateForm 
-          categoryName={category.name} 
-          setForm={(form)=>{this.form=form}}
+          <UpdateForm
+            categoryName={category.name}
+            setForm={(form) => { this.form = form }}
           />
         </Modal>
       </Card>

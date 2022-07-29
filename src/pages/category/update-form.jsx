@@ -10,11 +10,14 @@ export default class UpdateForm extends Component {
   }
   componentWillMount(){
     this.props.setForm(this.formRef)
+    
   }
   render() {
     return (
       <Form ref={this.formRef}>
-        <Form.Item name="categoryName" initialValue={this.props.categoryName}>
+        <Form.Item name="categoryName" initialValue={this.props.categoryName} rules={[
+            { required: true,  message: "分类名称必须输入" },
+          ]}>
           <Input placeholder="请输入分类名称" />
         </Form.Item>
       </Form>

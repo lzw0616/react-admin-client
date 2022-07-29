@@ -15,11 +15,6 @@ import {Redirect} from 'react-router-dom'
 class Login extends Component {
   formRef = React.createRef();
 
-  getFormData = (value) => {
-    const form = this.formRef.current
-    console.log(form.getFieldsValue())
-
-  }
   validatePwd = (rule, value) => {
     if (!value) {
       return Promise.reject(new Error('请输入密码'));
@@ -113,7 +108,7 @@ class Login extends Component {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" className="login-form-button" onClick={this.getFormData}>
+              <Button type="primary" htmlType="submit" className="login-form-button">
                 Log in
         </Button>
             </Form.Item>
